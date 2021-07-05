@@ -51,6 +51,25 @@ test('a valid blog can be added ', async () => {
   )
 })
 
+test('a valid blog can be added even if likes parameter is missing', async () => {
+  const newBlog = {
+    title: 'aaaaaaaaaaa',
+    author: 'bbbbbbbbbb',
+    url: 'https://aaaaaaaaaaaaaaaaaa'
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  expect(blogsAtEnd).toHaveLength(helper.initialBlog.length + 1)
+
+  // もっといい方法あるはずだけど思いつかなかった likesがdefaultで0を入るようにするやつ
+  expect(blogsAtEnd.[blogsAtEnd.length - 1].likes).toBe(0)
+})
 
 
 afterAll(() => {
