@@ -37,6 +37,11 @@ test('all blogs are returned', async () => {
   expect(response.body).toHaveLength(initialBlog.length)
 })
 
+test('a specific blog contains id key', async () => {
+  const response = await api.get('/api/blogs')
+  expect(response.body[0].id).toBeDefined()
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
