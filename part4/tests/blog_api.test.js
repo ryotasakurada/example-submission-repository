@@ -71,6 +71,22 @@ test('a valid blog can be added even if likes parameter is missing', async () =>
   expect(blogsAtEnd.[blogsAtEnd.length - 1].likes).toBe(0)
 })
 
+test('blog without title and URL is not added', async () => {
+  const newBlog = {
+    author: 'bbbbbbbbbb',
+    likes: 23
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400)
+
+  const notesAtEnd = await helper.blogsInDb()
+
+  expect(notesAtEnd).toHaveLength(helper.initialBlog.length)
+})
+
 
 afterAll(() => {
   mongoose.connection.close()
