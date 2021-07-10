@@ -87,6 +87,30 @@ test('blog without title and URL is not added', async () => {
   expect(notesAtEnd).toHaveLength(helper.initialBlog.length)
 })
 
+describe('deletion of a blog', () => {
+  test('succeeds with status code 204 if id is valid', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
+    await api.delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(204)
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(
+      helper.initialBlog.length - 1
+    )
+    const title = blogsAtEnd.map(r => r.title)
+    expect(title).not.toContain(blogToDelete.title)
+  })
+
+  test('failed with status code 404 if id is not exists', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    await api.delete(`/api/blogs/d9c69d1dd52`)
+      .expect(400)
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(
+      helper.initialBlog.length
+    )
+  })
+})
 
 afterAll(() => {
   mongoose.connection.close()
