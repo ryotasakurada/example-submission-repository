@@ -112,6 +112,35 @@ describe('deletion of a blog', () => {
   })
 })
 
+describe('update of a blog', () => {
+  test('succeeds with status code 200 if id is valid', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToUpdate = blogsAtStart[0]
+    blogToUpdate.title = "hello world updated"
+    blogToUpdate.likes = 12345
+    const responseBlog = await api.put(`/api/blogs/${blogToUpdate.id}`)
+      .send(blogToUpdate)
+      .expect(200)
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(helper.initialBlog.length)
+    const blog = blogsAtEnd.find(blog => blog.id === blogToUpdate.id)
+    expect(blog.title).toContain(blogToUpdate.title)
+    expect(blog.likes).toBe(blogToUpdate.likes)
+    expect(responseBlog.body.title).toBe(blogToUpdate.title)
+    expect(responseBlog.body.likes).toBe(blogToUpdate.likes)
+  })
+
+  test('failed with status code 404 if id is not exists', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    await api.delete(`/api/blogs/d9c69d1dd52`)
+      .expect(400)
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(
+      helper.initialBlog.length
+    )
+  })
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
