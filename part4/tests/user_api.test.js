@@ -29,7 +29,7 @@ test('a specific blog contains id key', async () => {
   expect(response.body[0].id).toBeDefined()
 })
 
-test('a valid blog can be added ', async () => {
+test('a valid user can be added ', async () => {
   const newUser = {
     name: 'aaaaaaaaaaa',
     username: 'bbbbbbbbbb',
@@ -47,6 +47,66 @@ test('a valid blog can be added ', async () => {
 
   const contents = usersAtEnd.map(n => n.name)
   expect(contents).toContain('aaaaaaaaaaa')
+  const password = usersAtEnd.map(n => n.password)
+  expect(password).not.toContain('beforeencrypted-password')
+})
+
+test('no username user can not be added ', async () => {
+  const newUser = {
+    name: 'aaaaaaaaaaa',
+    password: 'beforeencrypted-password',
+  }
+
+  const response = await api
+    .post('/api/users')
+    .send(newUser)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+  expect(response.body.error).toBe('username and password are mandatory keys')
+})
+
+test('no password user can not be added ', async () => {
+  const newUser = {
+    name: 'aaaaaaaaaaa',
+    username: 'jgiewjigweji',
+  }
+
+  const response = await api
+    .post('/api/users')
+    .send(newUser)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+  expect(response.body.error).toBe('username and password are mandatory keys')
+})
+
+test('less than 3 password length user can not be added ', async () => {
+  const newUser = {
+    name: 'aaaaaaaaaaa',
+    username: 'jgiewjigweji',
+    password: "12"
+  }
+
+  const response = await api
+    .post('/api/users')
+    .send(newUser)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+  expect(response.body.error).toBe('username and password needs 3+ length')
+})
+
+test('less than 3 username length user can not be added ', async () => {
+  const newUser = {
+    name: 'aaaaaaaaaaa',
+    username: '12',
+    password: "jt823j9ortkjg2heijokln"
+  }
+
+  const response = await api
+    .post('/api/users')
+    .send(newUser)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+  expect(response.body.error).toBe('username and password needs 3+ length')
 })
 
 afterAll(() => {

@@ -9,8 +9,10 @@ usersRouter.get('/', async (request, response) => {
 
 usersRouter.post('/', async (request, response) => {
   const body = request.body
-  if(!body.username && !body.name) {
-    response.status(400).end()
+  if(!body.username || !body.password) {
+    response.json({ error: 'username and password are mandatory keys' }).status(422).end()
+  } else if(body.username.length < 3 || body.password.length < 3) {
+    response.json({ error: 'username and password needs 3+ length' }).status(422).end()
   } else {
     const saltRounds = 10
     const passwordHash = await bcrypt.hash(body.password, saltRounds)
