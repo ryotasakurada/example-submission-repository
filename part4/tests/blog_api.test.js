@@ -33,7 +33,8 @@ test('a valid blog can be added ', async () => {
     title: 'aaaaaaaaaaa',
     author: 'bbbbbbbbbb',
     url: 'https://aaaaaaaaaaaaaaaaaa',
-    likes: 99
+    likes: 99,
+    userId: helper.initialUser[0].id
   }
 
   await api
