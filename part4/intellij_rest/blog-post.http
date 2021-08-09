@@ -1,10 +1,11 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImhlbGxvIiwiaWQiOiI2MTEwZGQwZmY5ZjkyMmEzMjhhNDI3YjAiLCJpYXQiOjE2Mjg0OTUxMjZ9.u7Ylx6dBEZz_1WmpF0GLi4P1-aloeNNsc_XJhPmPq1k
 
 {
   "title": "ブログタイトル2",
-  "author": "Ryota",
-  "url": "japaaaaaaaaan",
+  "author": "Rfewfweyota",
+  "url": "japfwfewaaaaaaaaan",
   "likes": 12
 }
 
