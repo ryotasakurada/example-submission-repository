@@ -19,7 +19,7 @@ blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
   if (!request.body.likes) {
     request.body.likes = 0
   }
-  if (!request.body.title && !request.body.url, request.body.token) {
+  if (!request.body.title && !request.body.url) {
     response.status(400).end()
   } else {
     const body = request.body
@@ -43,7 +43,6 @@ blogsRouter.delete('/:id', middleware.userExtractor, async (request, response, n
   try {
     const user = request.user
     const blog = await Blog.findById(request.params.id)
-    console.log(blog)
     if(blog.user.toString() === user.id.toString()) {
       blog.delete()
       response.status(204).end()

@@ -1,17 +1,40 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
+const jwt = require('jsonwebtoken')
 
 const helper = require('./test_helper')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
+
+let userTokens = []
+
 beforeEach(async () => {
   await Blog.deleteMany({})
   let noteObject = new Blog(helper.initialBlog[0])
   await noteObject.save()
   noteObject = new Blog(helper.initialBlog[1])
   await noteObject.save()
+  await User.deleteMany({})
+  let userObject1 = new User(helper.initialUser[0])
+  await userObject1.save()
+  let userObject2 = new User(helper.initialUser[1])
+  await userObject2.save()
+
+
+  const userForToken1 = {
+    username: userObject1.username,
+    id: userObject1.id
+  }
+  const token1 = jwt.sign(userForToken1, process.env.SECRET)
+  const userForToken2 = {
+    username: userObject1.username,
+    id: userObject2.id
+  }
+  const token2 = jwt.sign(userForToken1, process.env.SECRET)
+  userTokens = [token1, token2]
 })
 
 test('blogs are returned as json', async () => {
@@ -39,6 +62,7 @@ test('a valid blog can be added ', async () => {
 
   await api
     .post('/api/blogs')
+    .set('Authorization', "Bearer " + userTokens[0])
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -56,11 +80,13 @@ test('a valid blog can be added even if likes parameter is missing', async () =>
   const newBlog = {
     title: 'aaaaaaaaaaa',
     author: 'bbbbbbbbbb',
-    url: 'https://aaaaaaaaaaaaaaaaaa'
+    url: 'https://aaaaaaaaaaaaaaaaaa',
+    userId: helper.initialUser[0].id
   }
 
   await api
     .post('/api/blogs')
+    .set('Authorization', "Bearer " + userTokens[0])
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -72,14 +98,32 @@ test('a valid blog can be added even if likes parameter is missing', async () =>
   expect(blogsAtEnd.[blogsAtEnd.length - 1].likes).toBe(0)
 })
 
-test('blog without title and URL is not added', async () => {
+test('post blog with invalid token cannot be added', async () => {
   const newBlog = {
+    title: 'aaaaaaaaaaa',
     author: 'bbbbbbbbbb',
-    likes: 23
+    url: 'https://aaaaaaaaaaaaaaaaaa',
+    likes: 99,
+    userId: helper.initialUser[0].id
   }
 
   await api
     .post('/api/blogs')
+    .set('Authorization', "Bearer hugt823iojeg2lkw")
+    .send(newBlog)
+    .expect(401)
+})
+
+test('blog without title and URL is not added', async () => {
+  const newBlog = {
+    author: 'bbbbbbbbbb',
+    likes: 23,
+    userId: helper.initialUser[0].id
+  }
+
+  await api
+    .post('/api/blogs')
+    .set('Authorization', "Bearer " + userTokens[0])
     .send(newBlog)
     .expect(400)
 
