@@ -1,4 +1,5 @@
 const blogsRouter = require('express').Router()
+const middleware = require('../utils/middleware')
 
 const Blog = require('../models/blog')
 const User = require('../models/user')
@@ -14,7 +15,7 @@ blogsRouter.get('/:id', async (request, response) => {
   response.json(blog)
 })
 
-blogsRouter.post('/', async (request, response) => {
+blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
   if (!request.body.likes) {
     request.body.likes = 0
   }
@@ -23,7 +24,7 @@ blogsRouter.post('/', async (request, response) => {
   } else {
     const body = request.body
 
-    const user = await User.findById(request.decodedToken.id)
+    const user = request.user
     const blog = new Blog({
       title: body.title,
       author: body.username,
@@ -38,10 +39,9 @@ blogsRouter.post('/', async (request, response) => {
   }
 })
 
-blogsRouter.delete('/:id', async (request, response, next) => {
+blogsRouter.delete('/:id', middleware.userExtractor, async (request, response, next) => {
   try {
-    console.log(request.decodedToken)
-    const user = await User.findById(request.decodedToken.id)
+    const user = request.user
     const blog = await Blog.findById(request.params.id)
     console.log(blog)
     if(blog.user.toString() === user.id.toString()) {
